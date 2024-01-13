@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <div id="clusterGraph"></div>
+  
+  <script>
+    var graphs = {{ fig_json | safe }};
+    if (graphs != null) {
+      Plotly.plot('clusterGraph', graphs, {});
+    } else {
+      // Add your code to display a header when fig_json is null
+      console.log('No data available. Showing header.');
+      var header = document.createElement('h2');
+      header.innerHTML = 'No relevant data available.';
+      document.body.appendChild(header);
+      // add button to go back to home page
+      }
+      var button = document.createElement('button');
+      button.setAttribute('class', 'button');
+      button.innerHTML = 'Go back to home page';
+      button.onclick = function() {
+        window.location.href = '/';
+      }
+      document.body.appendChild(button);
+  </script>
+  
+</body>
+</html>

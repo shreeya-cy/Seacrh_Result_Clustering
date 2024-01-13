@@ -1,5 +1,3 @@
-
-
 from elasticsearch import Elasticsearch
 import os
 import pandas as pd
@@ -13,17 +11,21 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
+import plotly.express as px
+import warnings
+
+warnings.filterwarnings("ignore", category=SyntaxWarning, module="elasticsearch")
 
 def index_search(query):
-    es = Elasticsearch("https://localhost:9200",verify_certs=False, http_auth=('elastic', 'X3-ad2pd_g5bjLYxvfJW'))
+    es = Elasticsearch("http://localhost:9200")
     print(es.ping())
     if not es.indices.exists(index='practice_index'):
         es.indices.create(index='practice_index', ignore=400)
-        folder_path = '/Users/shreeyacy/Desktop/IR_P05/data'
+        folder_path = 'data'
         files = [f for f in os.listdir(folder_path) if f.endswith('.txt') and os.path.isfile(os.path.join(folder_path, f))]
         for txt_file in files:
             file_path = os.path.join(folder_path, txt_file)
-            with open(file_path, 'r') as file:
+            with open(file_path, 'r', encoding="utf8") as file:
                 content = file.read()
                 document = {
                     'filename': txt_file,
@@ -55,6 +57,9 @@ def index_search(query):
 
 def get_clusters(k, relevant_documents):
     data = pd.DataFrame(relevant_documents)
+    if data.empty:
+        print("No relevant documents found")
+        return None
     corpus = data['content'].tolist()
 
     for doc in corpus:
@@ -101,9 +106,12 @@ def get_clusters(k, relevant_documents):
     plt.xlabel('Dimension 1')
     plt.ylabel('Dimension 2')
     plt.legend()
-    plt.savefig('plot.png')
-    plt.show()
+    # plt.savefig('plot.png')
+    # plt.show()
 
+    fig = px.scatter(result_df, x='PCA1', y='PCA2', color='Cluster', labels={'Cluster': 'Cluster'}, title='Clusters of Documents')
+
+    return fig
 
 
 
