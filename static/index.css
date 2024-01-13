@@ -4,8 +4,8 @@
     left: 50%;
     transform: translate(-50%, -50%);
     /* increase the width and height of the div */
-    width: 500px;
-    height: 500px;
+    width: 600px;
+    height: 520px;
 }
 
 .input{
