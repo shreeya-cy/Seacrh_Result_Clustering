@@ -1,18 +1,32 @@
 <!DOCTYPE html>
 <html>
-<body>
-<!-- importing css -->
-<link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
-<!-- changing the tab name -->
-<title>Clustering</title>
-<div class="main-div">
-<form action="/cluster" method="post">
-  <label for="k" class="label">Enter k:</label><br>
-  <input type="text" id="k" name="k" type="number" class="input"><br>
-  <label for="query" class="label">Enter query:</label><br>
-  <input type="text" id="query" name="query" class="input"><br>
-  <input type="submit" value="Submit" class="button">
-</form>
-</div>
-</body>
+  <body>
+    <!-- importing css -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='index.css') }}"
+    />
+    <!-- changing the tab name -->
+    <title>Clustering</title>
+    <div class="main-div" style="text-align: center">
+      <form action="/cluster" method="post">
+        <label for="k" class="label"
+          >Enter k: <br />
+          [kindly enter positive numbers]</label
+        ><br />
+        <input
+          type="number"
+          min="0"
+          max="10"
+          id="k"
+          name="k"
+          type="number"
+          class="input"
+        /><br />
+        <label for="query" class="label">Enter query:</label><br />
+        <input type="text" id="query" name="query" class="input" /><br />
+        <input type="submit" value="Submit" class="button" />
+      </form>
+    </div>
+  </body>
 </html>
