@@ -1,3 +1,5 @@
+
+
 from elasticsearch import Elasticsearch
 import os
 import pandas as pd
@@ -19,17 +21,18 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="elasticsearch"
 def index_search(query):
     es = Elasticsearch("http://localhost:9200")
     print(es.ping())
+
     if not es.indices.exists(index='practice_index'):
         es.indices.create(index='practice_index', ignore=400)
-        folder_path = 'data'
+        folder_path = '/Users/shreeyacy/Desktop/IR_P05/data'
         files = [f for f in os.listdir(folder_path) if f.endswith('.txt') and os.path.isfile(os.path.join(folder_path, f))]
         for txt_file in files:
             file_path = os.path.join(folder_path, txt_file)
-            with open(file_path, 'r', encoding="utf8") as file:
+            with open(file_path, 'r') as file:
                 content = file.read()
                 document = {
                     'filename': txt_file,
-                    'content': content
+                    'content': content,
                 }
                 es.index(index='practice_index', body=document)
 
@@ -50,17 +53,15 @@ def index_search(query):
     for hit in results['hits']['hits']:
         document_info = {
             'filename': hit['_source']['filename'],
-            'content': hit['_source']['content']
+            'content': hit['_source']['content'],
         }
         relevant_documents.append(document_info)
     return relevant_documents
 
 def get_clusters(k, relevant_documents):
     data = pd.DataFrame(relevant_documents)
-    if data.empty:
-        print("No relevant documents found")
-        return None
     corpus = data['content'].tolist()
+    original_corpus = corpus.copy()
 
     for doc in corpus:
         index = corpus.index(doc)
@@ -83,13 +84,21 @@ def get_clusters(k, relevant_documents):
     final_df = tf_idf
 
 
-    kmeans = KMeans(n_clusters=k,init='k-means++',n_init=10, random_state=42)
+    kmeans = KMeans(n_clusters=k,n_init=10, random_state=42)
     kmeans.fit(final_df)
 
     labels = kmeans.labels_
     documents = data['filename'].tolist()
 
-    result_df = pd.DataFrame({'Document': documents, 'Cluster': labels})
+    result_df = pd.DataFrame({'Document': documents, 'Cluster': labels, 'Content': original_corpus})
+    print_df = pd.DataFrame({'Document': documents, 'Cluster': labels, 'Content': original_corpus})
+    print_df=print_df.reset_index(drop=True)
+    print_df["doc_id"]=print_df.index
+
+    #
+
+    #printing the retrieved document titles with their cluster number
+    print(print_df)
 
 
     pca = PCA(n_components=2)
@@ -97,10 +106,13 @@ def get_clusters(k, relevant_documents):
     result_df['PCA1'] = X_pca[:, 0]
     result_df['PCA2'] = X_pca[:, 1]
 
-    # Plot the scatterplot
+    # Plot the scatterplot and add the document numbers as labels
+
     for cluster in range(k):
         cluster_data = result_df[result_df['Cluster'] == cluster]
         plt.scatter(cluster_data['PCA1'], cluster_data['PCA2'], label=f'Cluster {cluster}')
+        for i, document in cluster_data.iterrows():
+            plt.annotate(f"Doc {i}", (document['PCA1'], document['PCA2']))
 
     plt.title('Clusters of Documents')
     plt.xlabel('Dimension 1')
@@ -109,15 +121,22 @@ def get_clusters(k, relevant_documents):
     # plt.savefig('plot.png')
     # plt.show()
 
-    fig = px.scatter(result_df, x='PCA1', y='PCA2', color='Cluster', labels={'Cluster': 'Cluster'}, title='Clusters of Documents')
+    fig = px.scatter(result_df, x='PCA1', y='PCA2', color='Cluster',
+                     labels={'Cluster': 'Cluster Number'}, title='Clusters of Documents',
+                     text='Document',hover_name='Document', custom_data=['Content', 'Document'])
+    
+    fig.update_traces(textposition='top center')
 
-    return fig
+    # Customize the layout if needed
+    fig.update_layout(xaxis_title='Dimension 1', yaxis_title='Dimension 2')
 
 
+    print_df = print_df.to_dict(orient="records")
+    return fig, print_df
 
 
 if __name__ == '__main__':
-    query = "bank"
-    k = 4
+    query = "india"
+    k = 3
     relevant_documents = index_search(query)
     get_clusters(k, relevant_documents)

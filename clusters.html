@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+</head>
+<body>
+  <div id="clusterGraph"></div>
+  
+  <!-- <script>
+    var graphs = {{ fig_json | safe }};
+    if (graphs != null) {
+      Plotly.plot('clusterGraph', graphs, {});
+    } else {
+      // Add your code to display a header when fig_json is null
+      console.log('No data available. Showing header.');
+      var header = document.createElement('h2');
+      header.innerHTML = 'No relevant data available.';
+      document.body.appendChild(header);
+      // add button to go back to home page
+      }
+      var button = document.createElement('button');
+      button.setAttribute('class', 'button');
+      button.innerHTML = 'Go back to home page';
+      button.onclick = function() {
+        window.location.href = '/';
+      }
+      document.body.appendChild(button);
+  </script> -->
+
+  <div id="cluster-plot"></div>
+  <h1 id="hovered-title">Hover over a point to see the document title</h1>
+  <h1 id="hovered-text">Hover over a point to see the document information</h1>
+  
+  <script>
+      // Load the Plotly figure from the Flask route
+      var fig_json = {{ fig_json | tojson | safe }};
+      var fig_data = JSON.parse(fig_json);
+  
+      // Display the Plotly figure in the 'cluster-plot' div
+      Plotly.newPlot('cluster-plot', fig_data);
+  
+      // Define a callback to update the hovered text
+      document.getElementById('cluster-plot').on('plotly_hover', function(eventdata){
+          var hover_data = eventdata.points[0];
+          var content = hover_data.customdata[0];
+          var title = hover_data.customdata[1];
+          document.getElementById('hovered-text').innerText = content;
+          document.getElementById('hovered-title').innerText = title;
+      });
+  </script>
+  </body>
+  </html>
