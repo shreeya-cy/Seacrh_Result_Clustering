@@ -17,6 +17,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 def index_search(query):
     es = Elasticsearch("https://localhost:9200",verify_certs=False, http_auth=('elastic', 'X3-ad2pd_g5bjLYxvfJW'))
     print(es.ping())
+
     if not es.indices.exists(index='practice_index'):
         es.indices.create(index='practice_index', ignore=400)
         folder_path = '/Users/shreeyacy/Desktop/IR_P05/data'
@@ -27,7 +28,7 @@ def index_search(query):
                 content = file.read()
                 document = {
                     'filename': txt_file,
-                    'content': content
+                    'content': content,
                 }
                 es.index(index='practice_index', body=document)
 
@@ -48,7 +49,7 @@ def index_search(query):
     for hit in results['hits']['hits']:
         document_info = {
             'filename': hit['_source']['filename'],
-            'content': hit['_source']['content']
+            'content': hit['_source']['content'],
         }
         relevant_documents.append(document_info)
     return relevant_documents
@@ -56,7 +57,7 @@ def index_search(query):
 def get_clusters(k, relevant_documents):
     data = pd.DataFrame(relevant_documents)
     corpus = data['content'].tolist()
-    original_corpus = corpus
+    original_corpus = corpus.copy()
 
     for doc in corpus:
         index = corpus.index(doc)
