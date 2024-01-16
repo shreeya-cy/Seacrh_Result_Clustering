@@ -85,6 +85,10 @@ def get_clusters(k, relevant_documents):
     documents = data['filename'].tolist()
 
     result_df = pd.DataFrame({'Document': documents, 'Cluster': labels})
+    print_df = result_df
+    print_df.insert(0, 'Document Number', print_df.index + 1)
+    #printing the retrieved document titles with their cluster number
+    print(print_df)
 
 
     pca = PCA(n_components=2)
@@ -92,10 +96,13 @@ def get_clusters(k, relevant_documents):
     result_df['PCA1'] = X_pca[:, 0]
     result_df['PCA2'] = X_pca[:, 1]
 
-    # Plot the scatterplot
+    # Plot the scatterplot and add the document numbers as labels
+
     for cluster in range(k):
         cluster_data = result_df[result_df['Cluster'] == cluster]
         plt.scatter(cluster_data['PCA1'], cluster_data['PCA2'], label=f'Cluster {cluster}')
+        for i, document in cluster_data.iterrows():
+            plt.annotate(f"Doc {i+1}", (document['PCA1'], document['PCA2']))
 
     plt.title('Clusters of Documents')
     plt.xlabel('Dimension 1')
@@ -110,6 +117,6 @@ def get_clusters(k, relevant_documents):
 
 if __name__ == '__main__':
     query = "bank"
-    k = 4
+    k = 3
     relevant_documents = index_search(query)
     get_clusters(k, relevant_documents)
