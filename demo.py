@@ -56,6 +56,7 @@ def index_search(query):
 def get_clusters(k, relevant_documents):
     data = pd.DataFrame(relevant_documents)
     corpus = data['content'].tolist()
+    original_corpus = corpus
 
     for doc in corpus:
         index = corpus.index(doc)
@@ -78,15 +79,19 @@ def get_clusters(k, relevant_documents):
     final_df = tf_idf
 
 
-    kmeans = KMeans(n_clusters=k,init='k-means++',n_init=10, random_state=42)
+    kmeans = KMeans(n_clusters=k,n_init=10, random_state=42)
     kmeans.fit(final_df)
 
     labels = kmeans.labels_
     documents = data['filename'].tolist()
 
     result_df = pd.DataFrame({'Document': documents, 'Cluster': labels})
-    print_df = result_df
-    print_df.insert(0, 'Document Number', print_df.index + 1)
+    print_df = pd.DataFrame({'Document': documents, 'Cluster': labels, 'Content': original_corpus})
+    print_df=print_df.reset_index(drop=True)
+    print_df["doc_id"]=print_df.index
+
+    #
+
     #printing the retrieved document titles with their cluster number
     print(print_df)
 
@@ -102,7 +107,7 @@ def get_clusters(k, relevant_documents):
         cluster_data = result_df[result_df['Cluster'] == cluster]
         plt.scatter(cluster_data['PCA1'], cluster_data['PCA2'], label=f'Cluster {cluster}')
         for i, document in cluster_data.iterrows():
-            plt.annotate(f"Doc {i+1}", (document['PCA1'], document['PCA2']))
+            plt.annotate(f"Doc {i}", (document['PCA1'], document['PCA2']))
 
     plt.title('Clusters of Documents')
     plt.xlabel('Dimension 1')
@@ -111,12 +116,13 @@ def get_clusters(k, relevant_documents):
     plt.savefig('plot.png')
     plt.show()
 
-
-
+    #convert print_df to json
+    print_df = print_df.to_dict(orient="records")
+    return print_df
 
 
 if __name__ == '__main__':
-    query = "bank"
+    query = "india"
     k = 3
     relevant_documents = index_search(query)
     get_clusters(k, relevant_documents)
