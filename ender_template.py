@@ -1,11 +1,8 @@
 from flask import Flask, render_template, request
 import plotly
-import numpy as np
-from plotly.subplots import make_subplots
-import plotly.graph_objs as go
 import json
 import demo
-from dash import Dash, dcc, html, Input, Output
+from dash import Dash, dcc, html, Input, Output, callback_context
 
 app = Flask(__name__)
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
@@ -21,17 +18,18 @@ def index():
     return render_template('index.html')
 
 @dash_app.callback(
-    Output('hovered-text', 'children'),
-    [Input('cluster-plot', 'hoverData')]
+    [Output('cluster-plot', 'figure'),
+     Output('hovered-text', 'children')],
+    [Input('cluster-plot', 'hoverData'),
+     Input('query-store', 'data')]
 )
 def update_hovered_text(hover_data):
     if hover_data is not None and 'points' in hover_data:
         point_data = hover_data['points'][0]
         doc_id = point_data.get('customdata', {}).get('Content', None)
-        if doc_id is not None:
-            return f"{hover_data}"
+        return dash.no_update
         
-    return "Hover over a point to see the document information"
+    return dash.no_update, "Hover over a point to see the document information"
 
 @app.route('/cluster', methods=['POST'])
 def cluster():

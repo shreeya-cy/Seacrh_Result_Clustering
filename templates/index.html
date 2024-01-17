@@ -8,6 +8,7 @@
     />
     <!-- changing the tab name -->
     <title>Clustering</title>
+    <div id="cluster-plot-content">
     <div class="main-div" style="text-align: center">
       <form action="/cluster" method="post">
         <label for="k" class="label"
@@ -15,17 +16,20 @@
         ><br />
         <input
           type="number"
-          min="0"
-          max="10"
+          min="1"
+          max="6"
           id="k"
           name="k"
           type="number"
           class="input"
+          required
         /><br />
         <label for="query" class="label">Enter query:</label><br />
-        <input type="text" id="query" name="query" class="input" /><br />
-        <input type="submit" value="Submit" class="button" />
+        <input type="text" id="query" name="query" class="input" required/><br />
+        <input type="submit" value="Search&nbsp;🔎" class="button" />
       </form>
     </div>
+  </div>
   </body>
+</p>
 </html>

@@ -1,5 +1,5 @@
 
-
+import re
 from elasticsearch import Elasticsearch
 import os
 import pandas as pd
@@ -21,14 +21,14 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="elasticsearch"
 def index_search(query):
     es = Elasticsearch("http://localhost:9200")
     print(es.ping())
-
+    
     if not es.indices.exists(index='practice_index'):
         es.indices.create(index='practice_index', ignore=400)
-        folder_path = '/Users/shreeyacy/Desktop/IR_P05/data'
+        folder_path = 'data'
         files = [f for f in os.listdir(folder_path) if f.endswith('.txt') and os.path.isfile(os.path.join(folder_path, f))]
         for txt_file in files:
             file_path = os.path.join(folder_path, txt_file)
-            with open(file_path, 'r') as file:
+            with open(file_path, 'r', encoding="utf8") as file:
                 content = file.read()
                 document = {
                     'filename': txt_file,
@@ -60,6 +60,9 @@ def index_search(query):
 
 def get_clusters(k, relevant_documents):
     data = pd.DataFrame(relevant_documents)
+    if data.empty:
+        print("No relevant documents found")
+        return None,None
     corpus = data['content'].tolist()
     original_corpus = corpus.copy()
 
@@ -133,7 +136,6 @@ def get_clusters(k, relevant_documents):
 
     print_df = print_df.to_dict(orient="records")
     return fig, print_df
-
 
 if __name__ == '__main__':
     query = "india"
