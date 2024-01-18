@@ -15,7 +15,7 @@ from nltk.stem import PorterStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 def index_search(query):
-    es = Elasticsearch("https://localhost:9200",verify_certs=False, http_auth=('elastic', 'X3-ad2pd_g5bjLYxvfJW'))
+    es = Elasticsearch("https://localhost:9200",verify_certs=False, http_auth=('username', 'pwd'))
     print(es.ping())
 
     if not es.indices.exists(index='practice_index'):
